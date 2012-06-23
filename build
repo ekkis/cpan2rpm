@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set +x
+f="cpan2rpm"
+v=$(./$f -V)
+
+#
+# makes sure we've documented changes before building
+#
+grep -q "^$v" Changes || {
+	echo "No Changes entry for version $v"
+	exit
+	}
+
+#
+# makes the man page
+#
+
+pod2html $f --title $f > man.pod
+perl -e '
+	$/ = undef;
+	$_ = <>;
+	s|<LI><A HREF="#name">NAME</A></LI>||;
+	s/<H1><A NAME="name">NAME.*?<HR>//s;
+	#s/<!-- INDEX BEGIN -->/<H1>cpan2rpm - A Perl module packager<\/H1>/;
+	print;
+	' man.pod | perl -e '
+		@f = <>;
+		for ($i = 12; $i < scalar(@f) - 4; $i++) {
+			print $f[$i];
+			};
+	' > man.html
+
+rm -f man.pod pod2htm?.*
+# [[ -e META.yml ]] && rm -f META.yml
+
+#
+# create the makefile
+#
+perl Makefile.PL
+#
+# run the makefile, create distribution package
+#
+make
+make dist
+#
+# build rpm from tarball
+#
+tarball="$f-$v.tar.gz"
+[[ -e $tarball ]] || {
+    echo "No tarball made!"
+    exit -1
+    }
+rpmbuild --sign -ta $tarball
+
+echo "Done"

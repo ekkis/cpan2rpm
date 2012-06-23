@@ -1,0 +1,5 @@
+For developers, a convenience script is provided that will package cpan2rpm after changes have been made.  it also builds an RPM.  If your system does not support this feature you can remove the final lines.  Run like this:
+
+# ./build
+
+
