@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 #   from the kit, but it must have an old timestamp or else make
 #   refuses to make it
 
-system "touch -d '1/1/00' cpan2rpm.spec";
+system "touch -t 0001010000 cpan2rpm.spec";
 
 WriteMakefile
     NAME => "cpan2rpm",
