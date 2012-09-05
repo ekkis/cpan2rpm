@@ -23,7 +23,7 @@
 
 use strict;
 use warnings;
-use File::Basename;
+use File::Basename qw(dirname);
 use vars qw($VERSION $VX);
 $VERSION = "2.029";
 
