@@ -25,7 +25,7 @@ use strict;
 use warnings;
 use File::Basename qw(dirname);
 use vars qw($VERSION $VX);
-$VERSION = "2.029";
+$VERSION = "2.030";
 
 use Getopt::Long;
 use Sys::Hostname;
