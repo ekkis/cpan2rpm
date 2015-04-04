@@ -524,7 +524,7 @@ sub get_meta {
 
     my @deps;
     my $deps = $meta{PREREQ_PM};
-    for (keys %$deps) {
+    for (grep { $_ ne "perl" } keys %$deps) {
         my $use = "use $_";
         $use .= " $deps->{$_}" if $deps->{$_};
 
@@ -1043,7 +1043,7 @@ sub mk_rpm {
     my $info = shift || $_; local $_;
 
     if (-d $info->{dist}) {
-        system("perl Makefile.PL && make") == 0 || die "mk_rpm(): $!"
+        system("perl Makefile.PL $info->{'make-maker'} && make") == 0 || die "mk_rpm(): $!"
             unless ($info->{name} eq "cpan2rpm");
         system("make dist") == 0 || die "mk_rpm('make dist'): $!";
 
