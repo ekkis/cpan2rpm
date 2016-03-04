@@ -108,6 +108,7 @@ sub init {
         "provides=s@"     => "modules provided by the package",
         "buildrequires=s@" => "packages required for building",
         "no-requires=s@"  => "suppresses generation of a set of reqs",
+        "no-provides=s@"  => "suppresses generation of a set of provides",
         "source|s=s@"     => "specifies (multiple) sources to use",
         "patch|p=s@"      => "specifies (multiple) patches to apply",
         "prepatch=s@"     => "specifies (multiple) patches to apply before spec file generation",
@@ -738,6 +739,35 @@ EOF
     $info->{"no-requires"}{"install"} ||= "";
     $info->{"no-requires"}{"clean"} ||= "";
 
+    if ($info->{"no-provides"}) {
+        my $noprovs = "";
+        for (@{$info->{"no-provides"}}) {
+            $noprovs .= qq/-e '$_' / for split /\s*,\s*/;
+            }
+        delete $info->{"no-provides"};
+        $info->{"no-provides"}{"define"}
+            = "%define custom_find_prov %{_tmppath}/%{NVR}-find-provides";
+        $info->{"find-provides"}
+            = "%define _use_internal_dependency_generator 0";
+        $info->{"find-provides"}
+            .= "\n%define __find_provides %{custom_find_prov}";
+        $info->{"find-provides"}
+            .= "\n%define __perl_provides %{custom_find_prov}";
+        local $_ = qq[cat <<EOF > %{custom_find_prov}
+            #!/bin/sh
+            /usr/lib/rpm/find-provides |grep -v $noprovs
+            EOF
+            chmod 755 %{custom_find_prov}
+            ];
+        s/^\s+//mg;
+        $info->{"no-provides"}{"install"} = $_;
+        $info->{"no-provides"}{"clean"} = "rm -f %{custom_find_prov}";
+        }
+
+    $info->{"no-provides"}{"define"} ||= "";
+    $info->{"no-provides"}{"install"} ||= "";
+    $info->{"no-provides"}{"clean"} ||= "";
+
     # fix patch info
 
     my $i = 0;
@@ -874,6 +904,8 @@ ZZ
 
     $spec .= $info->{"no-requires"}{"define"} . $/
         if $info->{"no-requires"}{"define"};
+    $spec .= $info->{"no-provides"}{"define"} . $/
+        if $info->{"no-provides"}{"define"};
     $spec .= $info->{"find-provides"} . $/
         if $info->{"find-provides"};
     $spec .= $info->{"find-requires"} . $/
@@ -947,6 +979,7 @@ ZZ
     $_ = <<ZZ;
         [ "%{buildroot}" != "/" ] && rm -rf %{buildroot}
         $info->{"no-requires"}{"install"}
+        $info->{"no-provides"}{"install"}
         $install
 
         cmd=/usr/share/spec-helper/compress_files
@@ -1020,6 +1053,8 @@ ZZ
     # $_ .= qq|rm -rf %_builddir/%name-%version\n|;
     $_ .= qq/$info->{"no-requires"}{"clean"}\n/
         if $info->{"no-requires"}{"clean"};
+    $_ .= qq/$info->{"no-provides"}{"clean"}\n/
+        if $info->{"no-provides"}{"clean"};
     $spec .= mksec($info, "clean" => $_);
 
     $spec .= qq|$/%files -f %filelist|;
@@ -1908,6 +1943,10 @@ Indicates packages that should be required for installation.  This option works 
 =item B<--no-requires=C<string-value>>
 
 Suppresses generation of a given required dependency.  Sometimes authors create dependencies on modules the packager can't find, sometimes RPM generates spurious dependencies.  This option allows the packager to arbitrarily supress a given requirement.
+
+=item B<--no-provides=C<string-value>>
+
+Suppresses generation of a given provide.  Sometimes authors create provides on modules the package shouldn't, sometimes RPM generates spurious provides.  This option allows the packager to arbitrarily supress a given provide.
 
 =item B<--buildrequires=C<string-value>>
 
