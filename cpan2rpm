@@ -493,7 +493,8 @@ sub get_meta {
 
     local @ARGV = ();
     local $0 = $t;
-    push @ARGV, $info->{"make-maker"} if $info->{"make-maker"};
+	my @listargs = split(' ', $info->{"make-maker"});
+    push @ARGV, @listargs if @listargs;
     # execute the makefile
     my $ok = 0;
     eval {
