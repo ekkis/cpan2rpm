@@ -1265,15 +1265,7 @@ sub get_cpan_web {
         # search.cpan.org web site output changes.
 
         local $_ = http_get($url) || return;
-        #m% \<a[^<>]*         # Begin Anchor tag
-        #    href\s*=\s*       # href parameter
-        #    ([\'\"]?)         # Maybe quote
-        #    ([^<>\s"']*)      # Extract link as $2
-        #    \1                # Maybe quote
-        #    [^<>]*\>          # End Anchor tag
-        #    \s*Download       # of the "Download" link
-        #    %ix;              # case insensitive HTML
-#
+
         m% \<a[^<>]*         # Begin Anchor tag
             href\s*=\s*       # href parameter
             ([\'\"]?)           # Maybe quote
