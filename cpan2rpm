@@ -25,7 +25,7 @@ use strict;
 use warnings;
 use File::Basename qw(dirname);
 use vars qw($VERSION $VX);
-$VERSION = "2.031";
+$VERSION = "2.032";
 
 use Getopt::Long;
 use Sys::Hostname;
@@ -1265,19 +1265,23 @@ sub get_cpan_web {
         # search.cpan.org web site output changes.
 
         local $_ = http_get($url) || return;
+
         m% \<a[^<>]*         # Begin Anchor tag
             href\s*=\s*       # href parameter
-            (['"]?)           # Maybe quote
-            ([^<>\s"']*)      # Extract link as $2
+            ([\'\"]?)           # Maybe quote
+            (https?\:\/\/cpan\.[^<>\s\"\']*\/authors\/id\/[^<>\s\"\']*(tar\.gz|tgz))      
+                              # Extract link as $2
             \1                # Maybe quote
             [^<>]*\>          # End Anchor tag
-            \s*Download       # of the "Download" link
             %ix;              # case insensitive HTML
+
 
         die "Module not found on CPAN web site!"
             unless $2;
 
-        $url = "$base/$2";
+        #$url = "$base/$2";
+        $url = $2;
+
         my ($loc, $fn) = $url =~ m|(.*)/(.*)|;
         print "Found: $fn\nAt: $loc\n";
         unlink($cache) if -l $cache;
@@ -1409,7 +1413,7 @@ sub finode {
 
 sub isurl {
     local $_ = shift || $_;
-    scalar m#(ht|f)tp://#;
+    scalar m#^(https?|ftp)://#;
     }
 
 #    Syntax: content = http_get [url]
