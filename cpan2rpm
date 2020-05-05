@@ -1083,7 +1083,7 @@ sub mk_rpm {
         # we should include make-maker args if it's given on the command line. example:
         # --make-maker="--incpath='-I/tmp/lcb/include' --libpath='-L/tmp/lcb/lib'"
         my $args = "";
-        $args = $info->{'make-maker'} if $info->{'make-maker'} !~ /%{__perl}/;
+        $args = $info->{'make-maker'} if $info->{'make-maker'} !~ /%\{__perl\}/;
 
         system("perl Makefile.PL $args && make") == 0 || die "mk_rpm(): $!"
             unless ($info->{name} eq "cpan2rpm");
@@ -1510,8 +1510,8 @@ sub chkdirs {
 
         # e.g. %_specdir = "%{name}-%{version}"
         my $x = $_;
-        s/%{?name?}/$info{name}/i if $info{name};
-        s/%{?version?}/$info{version}/i if $info{version};
+        s/%[{]?name[}]?/$info{name}/i if $info{name};
+        s/%[{]?version[}]?/$info{version}/i if $info{version};
         mkdir($_, 0755) unless $x eq $_ || -d $_;
         $RPMDIR{$k} = $_;
 
