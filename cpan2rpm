@@ -29,7 +29,6 @@ $VERSION = "2.033";
 
 use Getopt::Long;
 use Sys::Hostname;
-use Pod::Parser;
 
 my ($ME, $RPM, $TMPDIR, %RPMDIR, $CWD, %info, %meta, $ARGS);
 
@@ -363,7 +362,6 @@ sub get_mod {
 
 sub get_meta {
     my $info = shift || $_; local $_;
-    my $pod = Pod::Parser->new();
 
     print "Metadata retrieval\n";
 
@@ -570,17 +568,17 @@ sub get_meta {
 
     $meta{ABSTRACT} ||= "";
     if (!$meta{ABSTRACT} && $from) {
-        $meta{ABSTRACT} = $pod->interpolate($1)
+        $meta{ABSTRACT} = $1
             if $from =~ /=head\d\s+NAME.*?-\s*(.*?)$/ism;
         }
 
     $meta{DESCRIPTION} ||= "";
     if (!$meta{DESCRIPTION} && $from) {
         if ($from =~ /=head\d\s+DESCRIPTION\s+(.*?)=(head|cut)/ism) {
-            $meta{DESCRIPTION} = $pod->interpolate($1)
+            $meta{DESCRIPTION} = $1
             }
         elsif ($from =~ /=head\d\s+SYNOPSIS\s+(.*?)=(head|cut)/ism) {
-            $meta{DESCRIPTION} = $pod->interpolate($1)
+            $meta{DESCRIPTION} = $1
             }
         }
 
