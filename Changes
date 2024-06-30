@@ -1,7 +1,11 @@
 Revision history for cpan2rpm
 
+2.034 29/06/2024 19:00:00
+- Fix %source optagg bug when building in directory mode.
+
 2.033 29/06/2024 17:30:00
 - compatibility fixes for CentOS 9
+[ up to commit 8da7bae1 ]
 
 [ up to commit e9381e5a ]
 2.029 23/06/2012 13:57:54
