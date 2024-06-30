@@ -1,5 +1,7 @@
 Makefile
 cpan2rpm.spec
+*.tar.gz
 *META*
 blib/
 pm_to_blib
+man.html
