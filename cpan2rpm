@@ -1512,7 +1512,7 @@ sub chkdirs {
         my $x = $_;
         s/%[{]?name[}]?/$info{name}/i if $info{name};
         s/%[{]?version[}]?/$info{version}/i if $info{version};
-        mkdir($_, 0755) unless $x eq $_ || -d $_;
+        mkdir($_, 0755) unless -d $_;
         $RPMDIR{$k} = $_;
 
         next if /%/;    # skip chking in case other tags present
