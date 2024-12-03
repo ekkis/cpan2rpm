@@ -817,9 +817,15 @@ sub mk_spec {
     $info->{$_} ||= "" for qw/make fixin/;    # extra tags
     $info->{"$_-list"} ||= "" for @{$info->{"opts-agg"}};
 
-    # strip ctrl-M's from Windoze files
 
-    $info->{$_} =~ s/\r//g for keys %info;
+    for (@{$info->{"opts-simple"}}) {
+        if (defined($info->{$_})) {
+        # strip ctrl-M's from Windoze files
+        $info->{$_} =~ s/\r//g;
+        # replace newlines with spaces
+        $info->{$_} =~ s/\n/ /g;
+        }
+    }
 
     # generalise whenever possible
 
