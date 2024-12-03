@@ -671,7 +671,9 @@ EOF
 
     #    assemble other info
 
-    $info->{summary} = "$info->{name} - " . ($meta{ABSTRACT} || "Perl module");
+    unless (defined($info->{summary})) {
+        $info->{summary} = "$info->{name} - " . ($meta{ABSTRACT} || "Perl module");
+    }
     $info->{description} ||= $meta{DESCRIPTION} || "None.";
     if (!@{ $info->{source}||=[] }) {
         push @{$info->{source}}, $info->{tarball};
