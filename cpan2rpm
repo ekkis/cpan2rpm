@@ -228,8 +228,8 @@ sub init {
 
     unless ($info{"no-sign"}) {
         my $sig = getrpm_macdef("_signature");
-        $sig =~ s/none//i;
-        $sig && ($info{sign} = "--sign") || print "Signatures not set up\n";
+        $sig =~ s/none|%\{_signature\}//i;
+        $sig && ($info{sign} = "add") || print "Signatures not set up\n";
         }
 
     #   deal with newer versions
@@ -1125,13 +1125,15 @@ sub mk_rpm {
         if ($ret == 0) {
             my @cmd = ($RPM, '-ba');
             push @cmd, "--clean" unless $info->{"no-clean"};
-            push @cmd, $info->{sign} if $info->{sign};
             push @cmd, $info->{spec};
             debug(join " ", @cmd);
-            print "Signing package (pass phrase required)\n"
-                if $info->{sign};
             system(@cmd);
-            die "RPM build failed [$ret]" if $ret = $? >> 8;
+            die "RPM build (@cmd) failed [$ret]" if $ret = $? >> 8;
+            if ($info->{sign} && -r $info->{rpm}) {
+                print "\n\nSigning package (passphrase required) ...\n\n";
+                sleep 2;
+                system "rpmsign", "--addsign", $info->{rpm};
+                }
             }
         }
 
@@ -1578,11 +1580,6 @@ sub mk_rpm_dirs {
 	my $txt = <<EOF;
 		%_topdir $topdir
 
-		%_signature gpg
-		%_gpgbin /usr/bin/gpg
-		%_gpg_path ~/.gnupg
-		%_gpg_name <enter-your-key-id-here>
-
 		%_smp_mflags -j3
 		%__arch_install_post /usr/lib/rpm/check-rpaths /usr/lib/rpm/check-buildroot
 		%debug_package %{nil}
@@ -1664,10 +1661,8 @@ sub sign_setup {
 # --- miscellany --------------------------------------------------------------
 
 sub gpgkey {
-    for (qx|gpg --list-keys 2> /dev/null|) {
-        next unless /^pub/;
-        my ($id) = m|/([A-Z0-9]+)\s|;
-        return $id;
+    for (qx|gpg --list-keys --with-colons 2> /dev/null|) {
+        return $1 if /^pub:\w+:\d+:\w+:([A-Z0-9]+):/;
         }
     }
 
