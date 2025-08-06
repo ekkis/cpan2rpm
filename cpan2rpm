@@ -36,6 +36,8 @@ my $tarRE = q/\.(tar\.(g?z|bz2)|tgz|zip)$/;
 my $docRE = '(readme|changes|todo|license|install|\.txt|\.html)';
 my $HTTPWARN = 0;   # so we don't repeat warnings
 my $SPECCOL = 10;   # col width for generated spec files
+my $CPAN_BASE = "https://www.cpan.org";
+my $DETAILS_FILE = "modules/02packages.details.txt.gz";
 
 # --- main() ------------------------------------------------------------------
 
@@ -249,6 +251,7 @@ sub init {
     # set module download method
 
     my %cpan = (
+        reg => \&get_cpan_reg,
         cpanplus => \&get_cpan_plus,
         cpan => \&get_cpan_old,
         web => \&get_cpan_web
@@ -261,12 +264,15 @@ sub init {
         }
 
     $@ = "";
-    $info{fetch} ||= "web";  # default
+    $info{fetch} ||= "reg";  # default
     if ($info{fetch} eq "cpanplus" && (eval q/use CPANPLUS::Backend/, !$@)) {
         print "Fetch: CPAN+\n";
         }
     elsif ($info{fetch} eq "cpan" && (eval q/use CPAN 0.59/, !$@)) {
         print "Fetch: CPAN\n";
+        }
+    elsif ($info{fetch} eq "reg" && -w $RPMDIR{SOURCES}) {
+        print "Fetch: Registered Modules List\n";
         }
     else {
         print "Fetch: HTTP\n";
@@ -1150,6 +1156,37 @@ sub inst_rpm {
     }
 
 # --- module retrieval functions ----------------------------------------------
+
+sub get_cpan_reg {
+    my $info = shift;
+    my $reg_file = $DETAILS_FILE =~ m{([^/]+)$} ? "$RPMDIR{SOURCES}/$1" : die "Module list stank";
+    my $reg_url = "$CPAN_BASE/$DETAILS_FILE";
+    if (!-s $reg_file or $info->{force}) {
+        print "Downloading registered module details with wget...\n";
+        system wget => -N => -P => $RPMDIR{SOURCES} => $reg_url;
+        }
+    if (!-s $reg_file) {
+        print "Downloading registered module details without preserving timestamp...\n";
+        write_url($RPMDIR{SOURCES}, $reg_url);
+        }
+    if (!-s $reg_file || !-r $reg_file) {
+        die "Unable to read module details: $reg_url\n";
+        }
+
+    open my $fh, "-|", gzip => -dc => $reg_file;
+    while (<$fh>) {
+        #AAC::Pvoice    0.91  J/JO/JOUKE/AAC-Pvoice-0.91.tar.gz
+        if (m{^\Q$info->{dist}\E\s+(\S+)\s+((\w)/(\3\w)/(\4\w*)/\S+)}) {
+            # FOUND MODULE!
+            $info->{version} = $1;
+            $info->{f} = "$CPAN_BASE/authors/id/$2";
+            push @{$info->{source}}, $info->{f};
+            return $info->{tarball} = write_url($RPMDIR{SOURCES}, $info->{f});
+            }
+        }
+    close $fh;
+    die "Unable to locate module $info->{dist}\n";
+}
 
 sub get_cpan_plus {
     my $info = shift;
@@ -2081,7 +2118,7 @@ The options below perform functions not closely related to the quotidien process
 
 =item B<--fetch=C<string-value>>
 
-One of B<cpanplus>, B<cpan> or B<web>, this parameter specifies which method to use when retrieving a module from CPAN.  Web retrievals are by parsing the CPAN website and may be faster though more error prone.  To use either the CPAN or CPAN+ modules, these must be installed.  Default: web.
+One of B<cpanplus>, B<cpan>, B<web>, or B<reg>, this parameter specifies which method to use when retrieving a module from CPAN.  Web retrievals are by parsing the CPAN website and may be faster though more error prone.  To use either the CPAN or CPAN+ modules, these must be installed.  Default: reg, which parses CPAN's Registered module list for an exact match.
 
 If your environment requires the use of a proxy, simply set the environment variable as indicated below in (bash format):
 
