@@ -1370,11 +1370,11 @@ sub ls {
 sub untar($) {
     local $_ = shift;
     my $dst = shift || $TMPDIR;
-    my $zip = /\.zip$/;
+    my $zip = /\.zip$/i;
 
     my $z = /\.tar\.bz2$/i ? "j" : "z";
     my @cmd = (qw/tar -x --directory/, $dst, "-$z", "-f", $_);
-    @cmd = (qw/unzip -d/, $dst, $_) if /\.zip$/i;
+    @cmd = (qw/unzip -d/, $dst, $_) if $zip;
     system(@cmd) == 0 || die "system @cmd failed: $?";
     system("chmod", "-R", "u+w", $dst);
 
