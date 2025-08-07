@@ -1,11 +1,21 @@
 Revision history for cpan2rpm
 
+2.036 08/06/2025 21:00:00
+ - Update module query for the new cpan.org host.
+ - RPM Signing feature compatibility updates.
+ - Now also works with the new GPG 2.3.3.
+ - Handle .ZIP files case-insensitively.
+ - Fix self-upgrade to download tarball directly from CPAN.
+[ up to commit cb7a5d4b ]
+
 2.035 06/07/2024 16:00:00
 - Compatibility fix for rpm version 4.16.1.3
 - Attempt to create RPMDIR settings if not exist.
+[ up to commit 88524a52 ]
 
 2.034 29/06/2024 19:00:00
 - Fix %source optagg bug when building in directory mode.
+[ up to commit 6a1473b2 ]
 
 2.033 29/06/2024 17:30:00
 - compatibility fixes for CentOS 9
