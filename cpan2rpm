@@ -36,7 +36,7 @@ my $tarRE = q/\.(tar\.(g?z|bz2)|tgz|zip)$/;
 my $docRE = '(readme|changes|todo|license|install|\.txt|\.html)';
 my $HTTPWARN = 0;   # so we don't repeat warnings
 my $SPECCOL = 10;   # col width for generated spec files
-my $CPAN_BASE = "https://www.cpan.org";
+my $CPAN_BASE = "http://www.cpan.org";
 my $DETAILS_FILE = "modules/02packages.details.txt.gz";
 my $LATEST_SELF_SOURCE = "https://raw.githubusercontent.com/ekkis/cpan2rpm/HEAD/cpan2rpm";
 
@@ -77,7 +77,7 @@ sub init {
     # package info defaults
 
     %info = (
-        url               => "http://www.cpan.org",
+        url               => $CPAN_BASE,
         packager          => "Arix International <cpan2rpm\@arix.com>",
         group             => "Applications/CPAN",
         license           => "Artistic",
@@ -1476,7 +1476,7 @@ sub http_get {
         $url = "http://www.rpmfind.net/linux/rpm2html/search.php";
         $url .= "?query=perl-libwww-perl";
         print "  1) Try $url";
-        $url = "http://www.cpan.org/modules/by-module/LWP/";
+        $url = "$CPAN_BASE/modules/by-module/LWP/";
         $url .= "libwww-perl-5.68.tar.gz";
         print "  2) Specify the full URL of the tarball manually.";
         print "     cpan2rpm -i $url";
