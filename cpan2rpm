@@ -252,6 +252,7 @@ sub init {
     # set module download method
 
     my %cpan = (
+        api => \&get_cpan_api,
         reg => \&get_cpan_reg,
         cpanplus => \&get_cpan_plus,
         cpan => \&get_cpan_old,
@@ -265,12 +266,15 @@ sub init {
         }
 
     $@ = "";
-    $info{fetch} ||= "reg";  # default
+    $info{fetch} ||= "api";  # default
     if ($info{fetch} eq "cpanplus" && (eval q/use CPANPLUS::Backend/, !$@)) {
         print "Fetch: CPAN+\n";
         }
     elsif ($info{fetch} eq "cpan" && (eval q/use CPAN 0.59/, !$@)) {
         print "Fetch: CPAN\n";
+        }
+    elsif ($info{fetch} eq "api" && -w $RPMDIR{SOURCES}) {
+        print "Fetch: FastAPI\n";
         }
     elsif ($info{fetch} eq "reg" && -w $RPMDIR{SOURCES}) {
         print "Fetch: Registered Modules List\n";
@@ -1160,6 +1164,18 @@ sub inst_rpm {
 
 # --- module retrieval functions ----------------------------------------------
 
+sub get_cpan_api {
+    my $info = shift;
+    local $_ = http_get("http://fastapi.metacpan.org/v1/module/$info->{dist}");
+    if (m{download_url.*?((\w)/(\2\w)/(\3\w*)/[\w\-\.\:\+]+)}) {
+        $info->{f} = "$CPAN_BASE/authors/id/$1";
+        $info->{version} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
+        return $info->{tarball} = write_url($RPMDIR{SOURCES}, $info->{f});
+        }
+
+    die "Unable to locate module $info->{dist}\n";
+}
+
 sub get_cpan_reg {
     my $info = shift;
     my $reg_file = $DETAILS_FILE =~ m{([^/]+)$} ? "$RPMDIR{SOURCES}/$1" : die "Module list stank";
@@ -1846,7 +1862,8 @@ To make a package out of the current directory (that contains a module):
 
 To create a list of packages stored in a file:
 
-    cpan2rpm -f module-list
+    echo -e 'Proc::Daemon\nString::Canonical' > module-list.txt
+    cpan2rpm -f module-list.txt
 
 =head1 DESCRIPTION
 
