@@ -3,12 +3,18 @@
 
 ######################### We start with some black magic to print on failure.
 
+use strict;
+use warnings;
 use Test;
-BEGIN { plan tests => 1; $loaded = 0}
+our $loaded = 0;
+BEGIN { plan tests => 2; }
 END { ok $loaded;}
 
 # Just make sure everything compiles
-$exefile = "cpan2rpm";
+ok(eval "require CPAN::RPM" ? 1 : 0);
+#, "CPAN::RPM compiles fine");
+
+my $exefile = "cpan2rpm";
 system("$^X -c $exefile 2>/dev/null") &&
   die "Compilation failure: ".`$^X -c $exefile`;
 

@@ -7,21 +7,21 @@ use ExtUtils::MakeMaker;
 system "touch -t 0001010000 cpan2rpm.spec";
 
 WriteMakefile
-    NAME => "cpan2rpm",
-    VERSION_FROM => "cpan2rpm",
+    NAME => "CPAN::RPM",
+    VERSION_FROM => "lib/CPAN/RPM.pm",
     $] < 5.005 ? () : (
         AUTHOR => 'Erick Calder <ecalder@cpan.org>',
-        ABSTRACT_FROM => "cpan2rpm",
-        ),
+        ABSTRACT_FROM => "lib/CPAN/RPM.pm",
+    ),
     EXE_FILES => [ "cpan2rpm" ],
-    PREREQ_PM => { # e.g., Module::Name => 1.1
+    PREREQ_PM => {
         'ExtUtils::MakeMaker' => 5.4302,
         'LWP::UserAgent' => 0,
         'HTTP::Request' => 0,
-        },
+    },
     dist => {
         COMPRESS => "gzip -9 -vf",
-        },
+    },
     ;
 
 
