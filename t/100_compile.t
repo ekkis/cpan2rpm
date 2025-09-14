@@ -5,20 +5,16 @@
 
 use strict;
 use warnings;
-use Test;
-our $loaded = 0;
-BEGIN { plan tests => 2; }
-END { ok $loaded;}
+use Test::More tests => 3;
 
 # Just make sure everything compiles
-ok(eval "require CPAN::RPM" ? 1 : 0);
-#, "CPAN::RPM compiles fine");
+use_ok("CPAN::RPM");
 
 my $exefile = "cpan2rpm";
-system("$^X -c $exefile 2>/dev/null") &&
-  die "Compilation failure: ".`$^X -c $exefile`;
-
-$loaded = 1;
+my $try = `$^X -c -Ilib $exefile 2>&1 | head`;
+ok(!$?, "compile $exefile: clean exit");
+chomp $try;
+ok (($try =~ /(syntax OK)/i), "compile $exefile: $try");
 
 ######################### End of black magic.
 
