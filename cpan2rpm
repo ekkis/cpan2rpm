@@ -1170,6 +1170,11 @@ sub get_cpan_api {
     if (m{download_url.*?((\w)/(\2\w)/(\3\w*)/[\w\-\.\:\+]+)}) {
         $info->{f} = "$CPAN_BASE/authors/id/$1";
         $info->{version} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
+        if (/"distribution"\s*:\s*"([\w\-\.\:\+]+)"/) {
+            my $base = $1;
+            $base =~ s/\-+/::/g;
+            $info->{dist} = $base;
+            }
         return $info->{tarball} = write_url($RPMDIR{SOURCES}, $info->{f});
         }
 
