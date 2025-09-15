@@ -1851,9 +1851,13 @@ cpan2rpm - A Perl module packager
 
 =head1 SYNOPSIS
 
-To download the tarball from CPAN and create an RPM package, its source package and the specfile:
+To download the tarball from CPAN and create an RPM package, its source package, and the specfile:
 
-    cpan2rpm Proc::Daemon /tmp/String-Canonical-1.2.tar.gz
+    cpan2rpm Proc::Daemon
+
+To build from a local tarball:
+
+    cpan2rpm /tmp/String-Canonical-1.2.tar.gz
 
 To install from a URL:
 
@@ -1863,10 +1867,12 @@ To make a package out of the current directory (that contains a module):
 
     cpan2rpm .
 
-To create a list of packages stored in a file:
+Use -f to create multiple RPM packages from a list of modules stored a file:
 
     echo -e 'Proc::Daemon\nString::Canonical' > module-list.txt
     cpan2rpm -f module-list.txt
+      -or-
+    cpan2rpm `cat module-list.txt`
 
 =head1 DESCRIPTION
 
