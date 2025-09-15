@@ -39,7 +39,6 @@ my $SPECCOL = 10;   # col width for generated spec files
 my $LATEST_MOD = "http://fastapi.metacpan.org/v1/module";
 my $CPAN_BASE = "http://www.cpan.org";
 my $DETAILS_FILE = "modules/02packages.details.txt.gz";
-my $LATEST_SELF_SOURCE = "https://raw.githubusercontent.com/ekkis/cpan2rpm/HEAD/cpan2rpm";
 
 # --- main() ------------------------------------------------------------------
 
@@ -1738,9 +1737,8 @@ sub chkupgrade {
         $SIG{ALRM} = sub {
             die "Network too slow, check elapsed...\n";
             };
-        local $_ = $LATEST_SELF_SOURCE;
-        $_ = http_get();
-        $info{latestversionavailable} = $1 if /^\$VERSION\s*=\s*"*([\d\.]+)"*/m;
+        local $_ = http_get("$LATEST_MOD/CPAN::RPM");
+        $info{latestversionavailable} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
         };
     alarm(0);
     if ($info{latestversionavailable} and $info{latestversionavailable} gt $VERSION) {
