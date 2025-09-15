@@ -11,6 +11,7 @@ my $reqs = join ";"
 
 my @cmd = (
     $^X,
+    "-Ilib",
     "./cpan2rpm",
     ((eval("use File::Temp"),$@) ? ("--tempdir","/tmp/cpan2rpm") : ()),
     "--force",

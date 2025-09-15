@@ -25,7 +25,7 @@ use strict;
 use warnings;
 use File::Basename qw(dirname);
 use vars qw($VERSION $VX);
-$VERSION = "2.037";
+$VERSION = eval { require CPAN::RPM; $CPAN::RPM::VERSION } || "0";
 
 use Getopt::Long;
 use Sys::Hostname;
@@ -1730,6 +1730,7 @@ sub mksec {
 
 sub chkupgrade {
     return if defined $info{"no-upgrade-chk"};
+    return if !$VERSION;
     print "Upgrade check\n";
 
     eval {
@@ -1752,6 +1753,7 @@ sub chkupgrade {
 
 sub upgrade {
     $info{install}++;
+    die "Current version unclear!\n" unless $VERSION;
     my $ver = chkupgrade();
     die "Upgrade version unclear!\n" unless $ver;
     print "Current ver: $VERSION\n";
