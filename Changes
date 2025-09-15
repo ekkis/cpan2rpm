@@ -1,5 +1,10 @@
 Revision history for cpan2rpm
 
+2.037 09/15/2025 02:00:00
+ - Migrate to CPAN::RPM stub
+ - Avoid using dangerous https
+ - Get latest version from fastapi CPAN instead of github.
+
 2.036 08/06/2025 21:00:00
  - Update module query for the new cpan.org host.
  - RPM Signing feature compatibility updates.
