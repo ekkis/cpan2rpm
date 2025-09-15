@@ -36,6 +36,7 @@ my $tarRE = q/\.(tar\.(g?z|bz2)|tgz|zip)$/;
 my $docRE = '(readme|changes|todo|license|install|\.txt|\.html)';
 my $HTTPWARN = 0;   # so we don't repeat warnings
 my $SPECCOL = 10;   # col width for generated spec files
+my $LATEST_MOD = "http://fastapi.metacpan.org/v1/module";
 my $CPAN_BASE = "http://www.cpan.org";
 my $DETAILS_FILE = "modules/02packages.details.txt.gz";
 my $LATEST_SELF_SOURCE = "https://raw.githubusercontent.com/ekkis/cpan2rpm/HEAD/cpan2rpm";
@@ -1166,7 +1167,7 @@ sub inst_rpm {
 
 sub get_cpan_api {
     my $info = shift;
-    local $_ = http_get("http://fastapi.metacpan.org/v1/module/$info->{dist}");
+    local $_ = http_get("$LATEST_MOD/$info->{dist}");
     if (m{download_url.*?((\w)/(\2\w)/(\3\w*)/[\w\-\.\:\+]+)}) {
         $info->{f} = "$CPAN_BASE/authors/id/$1";
         $info->{version} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
