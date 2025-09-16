@@ -1,5 +1,9 @@
 Revision history for cpan2rpm
 
+2.039 09/15/2025 19:00:00
+ - Whoops! For simplicity and compatibility,
+   move $VERSION back into the cpan2rpm script.
+
 2.038 09/15/2025 18:00:00
  - More robust running version detection.
  - Rename RPM for myself back to cpan2rpm.
