@@ -27,7 +27,7 @@ use File::Basename qw(dirname);
 use Getopt::Long;
 use Sys::Hostname;
 
-our $VERSION = "2.040";
+our $VERSION = "2.041";
 
 my ($ME, $RPM, $TMPDIR, %RPMDIR, $CWD, %info, %meta, $ARGS, $VX);
 my $tarRE = q/\.(tar\.(g?z|bz2)|tgz|zip)$/;
