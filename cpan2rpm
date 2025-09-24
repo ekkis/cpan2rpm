@@ -665,7 +665,7 @@ sub get_meta {
         $doc{$_} = 1 if /$docRE/i;
         }
     $info->{doc} ||= "";
-    $info->{doc} = join " ", $info->{doc}, keys %doc
+    $info->{doc} = join " ", $info->{doc}, sort keys %doc
         unless $info->{doc} =~ s/^=//;
     $info->{doc} &&= "%doc $info->{doc}";
 
