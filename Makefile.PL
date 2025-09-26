@@ -7,7 +7,8 @@ use ExtUtils::MakeMaker;
 system "touch -t 0001010000 cpan2rpm.spec";
 
 WriteMakefile
-    NAME => "cpan2rpm",
+    NAME => "CPAN::RPM",
+    DISTNAME => "cpan2rpm",
     VERSION_FROM => "lib/CPAN/RPM.pm",
     $] < 5.005 ? () : (
         AUTHOR => 'Erick Calder <ecalder@cpan.org>',
