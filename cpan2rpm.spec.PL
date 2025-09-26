@@ -19,7 +19,7 @@ my @cmd = (
     "--spec", "./cpan2rpm.spec",
     "--requires", "%($reqs)",
     "--no-prfx",
-    "--dist=cpan2rpm",
+    "--name=cpan2rpm",
     "--buildarch=noarch",
     "--doc", "perl.req.patch",
     "--license", "Gnu Public License (GPL)",

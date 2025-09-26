@@ -17,6 +17,4 @@ CPAN::RPM - A Perl module packager
 
 This module is required to let L<cpan2rpm> be found on CPAN. Do not remove.
 
-L<cpan2rpm>
-
 =cut
