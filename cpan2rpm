@@ -1735,7 +1735,7 @@ sub chkupgrade {
         $SIG{ALRM} = sub {
             die "Network too slow, check elapsed...\n";
             };
-        local $_ = http_get("$LATEST_MOD/CPAN::RPM");
+        local $_ = http_get("$LATEST_MOD/cpan2rpm");
         $info{latestversionavailable} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
         };
     alarm(0);
@@ -1760,7 +1760,7 @@ sub upgrade {
         exit;
     }
     print "Upgrading...\n";
-    my $tarball = get_cpan_api({ dist => "CPAN::RPM" });
+    my $tarball = get_cpan_api({ dist => "cpan2rpm" });
     if (!$tarball or !-s $tarball) {
         local $\ = $/;
         print "\nERROR: Unable to retrieve tarball, please visit our web\n";
