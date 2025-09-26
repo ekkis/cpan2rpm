@@ -1,5 +1,8 @@
 Revision history for cpan2rpm
 
+2.043 09/26/2025 01:00:00
+ - Update DISTNAME for fastapi
+
 2.042 09/23/2025 23:30:00
  - Rename back to cpan2rpm
  - Sort %doc section files
