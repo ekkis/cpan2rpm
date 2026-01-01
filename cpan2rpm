@@ -399,6 +399,8 @@ sub get_meta {
 
     #   handle aggregate options
 
+    push @{ $info->{"buildrequires"} }, ($info->{"find-requires"} || "/usr/lib/rpm/perl.req");
+    push @{ $info->{"buildrequires"} }, ($info->{"find-provides"} || "/usr/lib/rpm/perl.prov");
     $info->{"$_-list"} = optagg($info) for @{$info->{"opts-agg"}};
     $info->{"define-list"} .= "";
     foreach (@{$info->{"define"}}) {
