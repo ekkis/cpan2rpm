@@ -5,9 +5,10 @@
 
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 # Just make sure everything compiles
+use_ok("cpan2rpm");
 use_ok("CPAN::RPM");
 
 my $exefile = "cpan2rpm";

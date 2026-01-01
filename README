@@ -22,7 +22,7 @@ If a package for your platform is not available, download the .src RPM
 and rebuild.  You can also simply download the tarball and rebuild it
 like this:
 
-	rpmbuild -ta CPAN-RPM-*.tar.gz
+	rpmbuild -ta cpan2rpm-*.tar.gz
 
 after which the resulting package will be located in
 

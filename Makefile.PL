@@ -8,10 +8,11 @@ system "touch -t 0001010000 cpan2rpm.spec";
 
 WriteMakefile
     NAME => "CPAN::RPM",
+    DISTNAME => "cpan2rpm",
     VERSION_FROM => "cpan2rpm",
     $] < 5.005 ? () : (
         AUTHOR => 'Erick Calder <ecalder@cpan.org>',
-        ABSTRACT_FROM => "lib/CPAN/RPM.pm",
+        ABSTRACT_FROM => "cpan2rpm",
     ),
     EXE_FILES => [ "cpan2rpm" ],
     PREREQ_PM => {
