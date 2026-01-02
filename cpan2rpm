@@ -1523,6 +1523,7 @@ sub http_get {
 
     my ($host, $doc) = $url =~ m|tp://(.*?)(/.*)|;
     my @prg = (
+        "/usr/bin/curl -s -o - $url",
         "/usr/bin/lynx -source $url",
         "/usr/bin/links -source $url",
         "/usr/bin/wget -O - $url",
