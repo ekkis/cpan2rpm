@@ -1553,7 +1553,7 @@ sub write_url {
     my $tar; ($tar = $url) =~ s|.*/||;
     return $tar if -s "$d/$tar" && -r _ && !$info{force};
 
-    print "Retrieving URL\n";
+    print "Retrieving URL: $url\n";
     local $_ = http_get($url);
     return if /^Fail/;    # Failed to establish connection
     return unless $_;
