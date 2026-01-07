@@ -1166,7 +1166,7 @@ sub inst_rpm {
 sub get_cpan_api {
     my $info = shift;
     local $_ = http_get("$LATEST_MOD/$info->{dist}");
-    if (m{download_url.*?((\w)/(\2\w)/(\3\w*)/[\w\-\.\:\+]+)}) {
+    if (m{download_url.*?((\w)/(\2\w)/(\3\w*)/[\w\-\.\:\+/]+)}) {
         $info->{f} = "$CPAN_BASE/authors/id/$1";
         $info->{version} = $1 if /"version"\s*:\s*"?([\d\.\_\-]+)"?/;
         if (/"distribution"\s*:\s*"([\w\-\.\:\+]+)"/) {
