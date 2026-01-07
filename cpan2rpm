@@ -489,7 +489,7 @@ sub get_meta {
         die "SAFETY ABORT!" if \$ENV{_DEEP_RECURSION}++ > 10;
 
         # when the function is called as a method e.g.
-        # Module::Build->new(), first arg iis module name
+        # Module::Build->new(), first arg is module name
 
         shift \@_ if \@_ % 2;
         
@@ -502,7 +502,7 @@ sub get_meta {
 
     local @ARGV = ();
     local $0 = $t;
-	my @listargs = split(' ', $info->{"make-maker"});
+    my @listargs = split(' ', $info->{"make-maker"});
     push @ARGV, @listargs if @listargs;
     # execute the makefile
     my $ok = 0;
@@ -1600,12 +1600,12 @@ sub chkdirs {
 sub mk_rpm_dirs {
     local $_ = "$ENV{HOME}/.rpmmacros";
     my $topdir = `echo -n $info{"mk-rpm-dirs"}`;
-	my $txt = <<EOF;
-		%_topdir $topdir
+    my $txt = <<EOF;
+	%_topdir $topdir
 
-		%_smp_mflags -j3
-		%__arch_install_post /usr/lib/rpm/check-rpaths /usr/lib/rpm/check-buildroot
-		%debug_package %{nil}
+	%_smp_mflags -j3
+	%__arch_install_post /usr/lib/rpm/check-rpaths /usr/lib/rpm/check-buildroot
+	%debug_package %{nil}
 EOF
 
     if (!-e) {
