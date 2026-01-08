@@ -592,6 +592,10 @@ sub get_meta {
             }
         }
 
+    if (!@{ $info->{source}||=[] }) {
+        push @{$info->{source}}, $info->{f} || $info->{tarball};
+        }
+
     $info->{author} ||= $meta{AUTHOR} || "";
 
     if (!$info->{author} && $from =~ /=head\d\s+AUTHORS?\s+(.*?)=/is) {
@@ -683,10 +687,6 @@ EOF
 
     $info->{summary} = "$info->{name} - " . ($meta{ABSTRACT} || "Perl module");
     $info->{description} ||= $meta{DESCRIPTION} || "None.";
-    if (!@{ $info->{source}||=[] }) {
-        push @{$info->{source}}, $info->{tarball};
-        $info->{"source-list"} = optagg($info, "source");
-        }
     $info->{changelog} = changelog();
 
     $info->{"find-provides"}
@@ -833,10 +833,11 @@ sub mk_spec {
 
     # generalise whenever possible
 
-    for (qw/tardir source/) {
-        $info->{$_} =~ s/$info->{name}/%{pkgname}/;
-        $info->{$_} =~ s/$info->{version}/%{version}/;
+    for ($info->{tardir}, @{ $info->{source} }) {
+        s/$info->{name}/%{pkgname}/;
+        s/$info->{version}/%{version}/;
         }
+    $info->{"source-list"} = optagg($info, "source");
 
     $info->{description} =~ s/\s+$//;
     $info->{maketest} = $info->{"make-no-test"} ? 0 : 1;
