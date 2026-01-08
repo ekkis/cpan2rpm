@@ -404,7 +404,7 @@ sub get_meta {
     $info->{"$_-list"} = optagg($info) for @{$info->{"opts-agg"}};
     $info->{"define-list"} .= "";
     foreach (@{$info->{"define"}}) {
-        if (/^(\w)=(.*)/) {
+        if (/^(\w+)=(.*)/) {
             $info->{"define-list"} .= "%define $1 $2\n";
             }
         else {
@@ -2025,7 +2025,7 @@ Allows for specifying patch files to be inserted into the spec file and applied 
 
 =item B<--define=C<name body>>
 
-Works much like the rpm --define syntax to define rpm macro initializations.  A comma-delimited list of macro definitions is not supported, but ut may be used multiple times to define more than one macro.
+Works much like the rpm --define syntax to define rpm macro initializations.  A comma-delimited list of macro definitions is not supported, but it may be used multiple times to define more than one macro.
 
 I<exempli gratia>
 
