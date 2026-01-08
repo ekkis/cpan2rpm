@@ -617,8 +617,8 @@ sub get_meta {
     if (!$info->{author}) {
         # Extract generic author from any of the urls
         for (@{$info->{source}}) {
-            if (isurl() && m%author.*/([A-Z\-]+)/[^/]+$%) {
-                $info->{author} = (lc $1).'@cpan.org';
+            if (isurl() && m%author.*/([A-Z]{3,})/%) {
+                $info->{author} = lc "$1\@cpan.org";
                 last;
                 }
             }
