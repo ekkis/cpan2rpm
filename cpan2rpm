@@ -535,8 +535,8 @@ sub get_meta {
     my @deps;
     my $deps = $meta{PREREQ_PM};
     for (grep { $_ ne "perl" } keys %$deps) {
-        my $use = "use $_";
-        $use .= " $deps->{$_}" if $deps->{$_};
+        my $use = "require $_";
+        $use .= "; $_->VERSION($deps->{$_})" if $deps->{$_};
 
         local $^W = 0;
         $@ = ""; eval $use;
