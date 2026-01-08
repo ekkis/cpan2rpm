@@ -399,8 +399,30 @@ sub get_meta {
 
     #   handle aggregate options
 
-    push @{ $info->{"buildrequires"} }, ($info->{"find-requires"} || "/usr/lib/rpm/perl.req");
-    push @{ $info->{"buildrequires"} }, ($info->{"find-provides"} || "/usr/lib/rpm/perl.prov");
+    my $sources = scalar @{ $info->{source}||=[] } || 1;
+    foreach my $opt (qw[find-provides find-requires]) {
+        (my $macro = "__$opt") =~ y/-/_/;
+        my $prog = $info->{$opt} or next;
+        chomp (my $source = -x $prog ? $prog : `which $prog 2>/dev/null`);
+        die "--$opt $prog: NOT EXECUTABLE" if !-x $source;
+        my $copy = "";
+        if (0 == system "rpm -qf $source 2>/dev/null") {
+            push @{ $info->{"buildrequires"} }, $source;
+            }
+        else {
+            my $target = $source =~ m{([^/]+)$} ? "$RPMDIR{SOURCES}/$1" : "";
+            system "cp","-p","-v",$source,$target;
+            if (-x $target) {
+                $copy = "\nSource".++$sources.": $source";
+                $source = "%{SOURCE$sources}";
+                }
+            }
+        $info->{$opt} = qq{%define $macro $source$copy};
+        push @{ $info->{define} }, "_use_internal_dependency_generator 0" if !grep { /^_use_internal_dependency_generator/ } @{$info->{define}};
+        }
+
+    push @{ $info->{"buildrequires"} }, "/usr/lib/rpm/perl.req" if !$info->{"find-requires"};
+    push @{ $info->{"buildrequires"} }, "/usr/lib/rpm/perl.prov"if !$info->{"find-provides"};
     $info->{"$_-list"} = optagg($info) for @{$info->{"opts-agg"}};
     $info->{"define-list"} .= "";
     foreach (@{$info->{"define"}}) {
@@ -688,13 +710,6 @@ EOF
     $info->{summary} = "$info->{name} - " . ($meta{ABSTRACT} || "Perl module");
     $info->{description} ||= $meta{DESCRIPTION} || "None.";
     $info->{changelog} = changelog();
-
-    $info->{"find-provides"}
-        &&= qq/%define __find_provides $info->{"find-provides"}/;
-    $info->{"find-requires"} &&= qq/
-        %define __find_requires $info->{"find-requires"}\n
-        %define __perl_requires $info->{"find-requires"}
-        /;
 
     #   section handlers
 
