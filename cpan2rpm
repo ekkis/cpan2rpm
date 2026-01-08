@@ -650,6 +650,7 @@ sub get_meta {
         $info->{tardir} .= "-$info->{version}"
             unless $info->{tardir} =~ /-(\d+.*)$/;
         $info->{tarball} = "$info->{tardir}.tar.gz";
+        unshift @{$info->{source}}, $info->{tarball};
         }
 
     #   tarballs without a subdir need one created
@@ -683,10 +684,6 @@ EOF
 
     $info->{summary} = "$info->{name} - " . ($meta{ABSTRACT} || "Perl module");
     $info->{description} ||= $meta{DESCRIPTION} || "None.";
-    if (!@{ $info->{source}||=[] }) {
-        push @{$info->{source}}, $info->{tarball};
-        $info->{"source-list"} = optagg($info, "source");
-        }
     $info->{changelog} = changelog();
 
     $info->{"find-provides"}
@@ -833,10 +830,11 @@ sub mk_spec {
 
     # generalise whenever possible
 
-    for (qw/tardir source/) {
-        $info->{$_} =~ s/$info->{name}/%{pkgname}/;
-        $info->{$_} =~ s/$info->{version}/%{version}/;
+    for ($info->{tardir}, @{ $info->{source} }) {
+        s/$info->{name}/%{pkgname}/;
+        s/$info->{version}/%{version}/;
         }
+    $info->{"source-list"} = optagg($info, "source");
 
     $info->{description} =~ s/\s+$//;
     $info->{maketest} = $info->{"make-no-test"} ? 0 : 1;
