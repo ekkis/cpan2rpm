@@ -334,7 +334,7 @@ sub get_mod {
     if (isurl($ret{dist})) {
         $ret{tarball} = write_url($RPMDIR{SOURCES}, $ret{dist})
             || die "Unable to retrieve tarball";
-        push @{$ret{source}}, $ret{dist};
+        unshift @{$ret{source}}, $ret{dist};
         }
 
     #
@@ -346,6 +346,7 @@ sub get_mod {
             || die "get_mod(): cp [$ret{dist}] - $!"
             ;
         ($ret{tarball} = $ret{dist}) =~ s|.*/||;
+        unshift @{$ret{source}}, $ret{tarball};
         }
 
     #
@@ -362,6 +363,7 @@ sub get_mod {
 
     else {
         $ret{tarball} = $ret{get_mod}(\%ret);
+        unshift @{$ret{source}}, $ret{f} || $ret{tarball};
         }
 
     local $_ if defined wantarray();
@@ -1707,7 +1709,8 @@ sub optagg {
     my $nm = shift || $_;
     my @opt; push @opt, split /,/ for @{$info->{$nm}};
     my $ret = "";
-    $ret .= sprintf("%-*s %s\n", $SPECCOL, "$nm:", $_) for @opt;
+    $nm .= 0 if $nm eq "source";
+    $ret .= sprintf("%-*s %s\n", $SPECCOL, "$nm:", $_), $nm =~ s/(\d+)$/$1+1/e for @opt;
     $ret;
     }
 
