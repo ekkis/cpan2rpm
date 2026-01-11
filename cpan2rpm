@@ -24,7 +24,8 @@
 use strict;
 use warnings;
 use File::Basename qw(dirname);
-use Getopt::Long;
+use Cwd qw(cwd abs_path);
+use Getopt::Long qw(GetOptions);
 use Sys::Hostname;
 use vars qw($VERSION);
 $VERSION = "2.048";
@@ -65,7 +66,7 @@ sub init {
     ($ME = $0) =~ s|.*/||;
 
     $ENV{PATH} = "/bin:/usr/bin";       # makes suexec happy
-    chomp($CWD = untaint(qx/pwd/));     # remember where we start
+    $CWD = cwd;                         # remember where we start
 
     $RPM = inpath("rpmbuild");
     $RPM = inpath("rpm") unless $RPM;
@@ -314,6 +315,14 @@ sub init {
 
     syntax(\%desc, "No distribution specified!")
         unless @ARGV;
+
+    foreach my $path (@{ $info{source}||=[] }, @ARGV, @info{"find-provides","find-requires"}) {
+        defined $path or next;
+        $path = abs_path $path if -e $path;
+        if (-e $path and $path =~ m{([^/]+)$}) {
+            cp($path, $RPMDIR{SOURCES});
+            }
+        }
     }
 
 #
@@ -401,26 +410,25 @@ sub get_meta {
 
     #   handle aggregate options
 
-    my $sources = scalar @{ $info->{source}||=[] } || 1;
+    my $sources = scalar @{ $info->{source} } || 1;
     foreach my $opt (qw[find-provides find-requires]) {
         (my $macro = "__$opt") =~ y/-/_/;
         my $prog = $info->{$opt} or next;
         chomp (my $source = -x $prog ? $prog : `which $prog 2>/dev/null`);
         die "--$opt $prog: NOT EXECUTABLE" if !-x $source;
-        my $copy = "";
         if (0 == system "rpm -qf $source 2>/dev/null") {
             push @{ $info->{"buildrequires"} }, $source;
+            $info->{$opt} = "";
             }
-        else {
-            my $target = $source =~ m{([^/]+)$} ? "$RPMDIR{SOURCES}/$1" : "";
-            system "cp","-p","-v",$source,$target;
-            if (-x $target) {
-                $copy = "\nSource".++$sources.": $source";
+        elsif ($source =~ m{([^/]+)$}) {
+            if (-x "$RPMDIR{SOURCES}/$1") {
+                $sources++;
+                $info->{$opt} = "\nSource$sources: $source";
                 $source = "%{SOURCE$sources}";
                 }
             }
-        $info->{$opt} = qq{%define $macro $source$copy};
         push @{ $info->{define} }, "_use_internal_dependency_generator 0" if !grep { /^_use_internal_dependency_generator/ } @{$info->{define}};
+        push @{ $info->{define} }, "$macro $source";
         }
 
     push @{ $info->{"buildrequires"} }, "/usr/lib/rpm/perl.req" if !$info->{"find-requires"};
@@ -821,9 +829,6 @@ EOF
         $i++;
         }
 
-    # return to user's directory
-
-    chdir $CWD;
     }
 
 #
@@ -1312,7 +1317,7 @@ sub get_cpan_old {
         );
 
     debug("ff=$ff");
-    system("cp", $ff, $RPMDIR{SOURCES}) if -r $ff;
+    cp($ff, $RPMDIR{SOURCES}) if -r $ff;
     $ff =~ s|.*/||;
     $info->{tarball} = $ff;
     }
@@ -1473,7 +1478,7 @@ sub cp {
     return 1 unless -r $f;
     ($ff = $f) =~ s|.*/||;
     return 1 if finode($f) eq finode("$d/$ff");
-    system("cp", "-u", $f, $d) == 0;
+    system("cp", "-u", "-p", $f, $d) == 0;
     }
 
 #    0: dev, 1: inode, the combination guarantees
@@ -1815,14 +1820,6 @@ sub trim {
         $_ ||= ""; s/^\s+//; s/\s+$//;
         }
     $_[0] if @_ == 1;
-    }
-
-# dirty way to untaint stuff to make suExec happy
-
-sub untaint {
-    my $k = shift;
-    my %x; $x{$k} = 1;
-    return (keys %x)[0];
     }
 
 sub debug {
