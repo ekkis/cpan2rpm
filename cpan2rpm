@@ -23,6 +23,7 @@
 
 use strict;
 use warnings;
+BEGIN { eval { require File::Temp; } }
 use File::Basename qw(dirname);
 use Cwd qw(cwd abs_path);
 use Getopt::Long qw(GetOptions);
@@ -56,6 +57,8 @@ for (@ARGV) {
 END {
     return print "$VERSION\n" if $VX;
     print "-- Done --\n";
+    # return to user's directory
+    chdir $CWD if $CWD;
     }
 
 # Stub routine required to prevent destruction of fresh Makefile
@@ -213,7 +216,7 @@ sub init {
     else {
         my $msg = "Cannot run without File::Temp, please install ";
         $msg .= "or use the --tempdir option.\n";
-        eval "use File::Temp qw/tempdir/";
+        eval { import File::Temp qw/tempdir/ };
         $msg = "$@\n$msg" if $info{debug};
         die $msg if $@;
 
