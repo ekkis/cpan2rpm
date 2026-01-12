@@ -317,7 +317,7 @@ sub init {
     syntax(\%desc, "No distribution specified!")
         unless @ARGV;
 
-    foreach my $path (@{ $info{source}||=[] }, @info{"find-provides","find-requires"}) {
+    foreach my $path (@{ $info{source}||=[] }) {
         defined $path or next;
         $path = abs_path $path if -e $path;
         cp($path, $RPMDIR{SOURCES}) or die "$path: Unable to copy\n";
@@ -409,7 +409,7 @@ sub get_meta {
 
     #   handle aggregate options
 
-    my $sources = scalar @{ $info->{source} } || 1;
+    my $sources = scalar @{ $info->{source} } + (-d $info->{dist} ? 1 : 0);
     foreach my $opt (qw[find-provides find-requires]) {
         (my $macro = "__$opt") =~ y/-/_/;
         my $prog = $info->{$opt} or next;
@@ -419,12 +419,13 @@ sub get_meta {
             push @{ $info->{"buildrequires"} }, $source;
             $info->{$opt} = "";
             }
-        elsif ($source =~ m{([^/]+)$}) {
-            if (-x "$RPMDIR{SOURCES}/$1") {
-                $sources++;
-                $info->{$opt} = "\nSource$sources: $source";
-                $source = "%{SOURCE$sources}";
-                }
+        else {
+            my $copy = cp($source, $RPMDIR{SOURCES});
+            die "$copy: NOT EXECUTABLE" if !-x $copy;
+            $info->{$opt} = "";
+            push @{ $info->{source} }, $source;
+            $source = "%{SOURCE$sources}";
+            $sources++;
             }
         push @{ $info->{define} }, "_use_internal_dependency_generator 0" if !grep { /^_use_internal_dependency_generator/ } @{$info->{define}};
         push @{ $info->{define} }, "$macro $source";
