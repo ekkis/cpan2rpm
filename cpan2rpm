@@ -455,26 +455,12 @@ sub get_meta {
             }
         }
 
-    eval "use File::Find";
-    if ($@) {
-        local $_ = "Cannot automatically determine architecture for\n";
-        $_ .= "package - defaulting to %_arch macro (this value\n";
-        $_ .= "may be overridden with the --buildarch parameter.\n";
-        $_ .= "Please install File::Find to allow for automatic\n";
-        $_ .= "arch selection.";
-        $_ .= "\n$@" if $info->{debug};
-        print;
-        }
-    else {
-        my $xs = 0;
-        find(sub { $xs = 1 if /\.(xs|c)$/i }, $info->{evaldir});
-        $info->{buildarch} = "noarch" if $xs == 0;
-        }
-
     $info->{evaldir} = dirname($info->{evaldir})
         unless -d $info->{evaldir};
 
     chdir $info->{evaldir} || die "get_meta(): $!";
+
+    $info->{buildarch} = "noarch" unless $_ = readfile("MANIFEST") and /\.(xs|c)$/im;
 
     $_ = "$info->{evaldir}/Build.PL";
     $_ = "$info->{evaldir}/Makefile.PL" unless -e;
