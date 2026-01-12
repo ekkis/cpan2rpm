@@ -319,12 +319,10 @@ sub init {
     syntax(\%desc, "No distribution specified!")
         unless @ARGV;
 
-    foreach my $path (@{ $info{source}||=[] }, @ARGV, @info{"find-provides","find-requires"}) {
+    foreach my $path (@{ $info{source}||=[] }, @info{"find-provides","find-requires"}) {
         defined $path or next;
         $path = abs_path $path if -e $path;
-        if (-e $path and $path =~ m{([^/]+)$}) {
-            cp($path, $RPMDIR{SOURCES});
-            }
+        cp($path, $RPMDIR{SOURCES}) or die "$path: Unable to copy\n";
         }
     }
 
@@ -366,7 +364,7 @@ sub get_mod {
     #
 
     elsif (-d $ret{dist}) {
-        chdir $ret{dist};
+        $ret{dist} = abs_path $ret{dist};
         }
 
     #
@@ -1477,11 +1475,11 @@ sub writefile($@) {
 
 sub cp {
     my ($f, $d, $ff) = @_;
-    $f =~ s/~/$ENV{HOME}/;
-    return 1 unless -r $f;
+    $f =~ s%^~/%$ENV{HOME}/%;
+    return "" unless -r $f;
     ($ff = $f) =~ s|.*/||;
-    return 1 if finode($f) eq finode("$d/$ff");
-    system("cp", "-u", "-p", $f, $d) == 0;
+    return "$d/$ff" if finode($f) eq finode("$d/$ff");
+    return system("cp", "-u", "-p", $f, $d) == 0 ? "$d/$ff" : "";
     }
 
 #    0: dev, 1: inode, the combination guarantees
