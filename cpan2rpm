@@ -417,7 +417,7 @@ sub get_meta {
     foreach my $opt (qw[find-provides find-requires]) {
         (my $macro = "__$opt") =~ y/-/_/;
         my $prog = $info->{$opt} or next;
-        chomp (my $source = -x $prog ? $prog : `which $prog 2>/dev/null`);
+        my $source = $prog =~ /\// ? $prog : inpath($prog);
         die "--$opt $prog: NOT EXECUTABLE" if !-x $source;
         if (0 == system "rpm -qf $source 2>/dev/null") {
             push @{ $info->{"buildrequires"} }, $source;
