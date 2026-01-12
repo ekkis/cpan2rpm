@@ -574,10 +574,10 @@ sub get_meta {
         if (-d $info->{dist}) {
             ($info->{tarball} = $info->{dist}) =~ s|.*/||;
             # a source directory may include a version #
-            $info->{tarver} = $info->{tarball} =~ s/-(\d+\.?\d*)$// ? $1 : "";
+            $info->{tarver} = $info->{tarball} =~ s/-(\d+\.?[0-9_]*)$// ? $1 : "";
             }
         $info->{module} = $info->{tarball};
-        $info->{module} =~ s/-(\d+\.?\d*)$tarRE$//i;
+        $info->{module} =~ s/-(\d+\.?[0-9_]*)$tarRE$//i;
         $info->{module} =~ s/-/::/g;
         }
 
@@ -649,6 +649,16 @@ sub get_meta {
         }
     $info->{version} ||= $info->{tarver};
 
+    if (!$info->{version}) {
+        # Extract generic version from any of the sources
+        for (@{$info->{source}}) {
+            if (/-(\d+\.?[0-9_]*)$tarRE$/i) {
+                $info->{version} = $1;
+                last;
+                }
+            }
+        }
+
     die "No version found, please use --version option.  Stopped"
         unless $info->{version};
 
@@ -664,7 +674,7 @@ sub get_meta {
     if (-d $info->{dist}) {
         ($info->{tardir} = $info->{module}) =~ s|::|-|g;
         $info->{tardir} .= "-$info->{version}"
-            unless $info->{tardir} =~ /-(\d+.*)$/;
+            unless $info->{tardir} =~ /-\d+/;
         $info->{tarball} = "$info->{tardir}.tar.gz";
         unshift @{$info->{source}}, $info->{tarball};
         }
