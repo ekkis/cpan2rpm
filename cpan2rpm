@@ -68,9 +68,7 @@ sub init {
     $|++;    # good for system()
     ($ME = $0) =~ s|.*/||;
 
-    $ENV{PATH} = "/bin:/usr/bin";       # makes suexec happy
-    $CWD = cwd;                         # remember where we start
-
+    $CWD = cwd;
     $RPM = inpath("rpmbuild");
     $RPM = inpath("rpm") unless $RPM;
     die "Cannot find rpmbuild/rpm in PATH" unless $RPM;
@@ -454,8 +452,8 @@ sub get_meta {
         if ($patch_ret != 0) {
             print "";
             exit;
+            }
         }
-    }
 
     eval "use File::Find";
     if ($@) {
@@ -1415,16 +1413,15 @@ sub untar($) {
     my $zip = /\.zip$/i;
 
     my $z = /\.tar\.bz2$/i ? "j" : "z";
-    my @cmd = (qw/tar -x --directory/, $dst, "-$z", "-f", $_);
-    @cmd = (qw/unzip -d/, $dst, $_) if $zip;
+    my @cmd = $zip
+        ? ("unzip", "-d", $dst, $_)
+        : ("tar", "-C", $dst, "-x$z", "-f", $_);
     system(@cmd) == 0 || die "system @cmd failed: $?";
     system("chmod", "-R", "u+w", $dst);
 
     my $cmd = $zip
-        ? "unzip -l $_ | grep -P -o '\\S+/\$' |tail -1"
-        : "tar -t${z}f $_ |head -n 1"
-        ;
-
+        ? "unzip -l $_ | grep -P -o '\\S+/\$' | tail -1"
+        : "tar -t$z -f $_ | head -n 1";
     chomp($_ = qx/$cmd/);
     $_ = (split)[0] unless $zip;
     if ($_ =~ m|/|) {
