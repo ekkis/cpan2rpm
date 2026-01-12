@@ -613,15 +613,14 @@ sub get_meta {
 
     if (!$info->{author} && $from =~ /=head\d\s+AUTHORS?\s+(.*?)=/is) {
         local $_ = $1;
-        my ($em) = /(\S+(@|\sat\s)\S+)/is;
-        $em ||= "";
+        my $em = /(\S+@\S+)/ || /(\S+\s+at\s+\S+)/ ? $1 : "";
         $em =~ s/\.$//;             # e.g. Erick Calder e@arix.com.
-        ($_) = /((?:\S+\s+){1,3})\Q$em\E/is;
+        ($_) = /((?:\S+[\ \t]+){0,2}\S+)\s+\Q$em\E/i;
         $_ ||= "";
-        s/[^a-zA-Z ]+//g;           # Peter Behroozi, behroozi@www.pls.uni.edu
+        s/[^a-zA-Z\-\s]+//g;        # Peter Behroozi, behroozi@www.pls.uni.edu
         trim(); s/\s+/ /g;
         $em =~ s/\s+at\s+/@/g;
-        $em =~ s/[()<>]//g;           # Eryq (eryq@zeegee.com)
+        $em =~ s/[()<>]//g;         # Eryq (eryq@zeegee.com)
         $_ .= " <$em>";
         s/E<(lt|gt)>//ig;           # Erick Calder E<lt>e@arix.comE<gt>
         $info->{author} = $_;
@@ -630,8 +629,8 @@ sub get_meta {
     if (!$info->{author}) {
         # Extract generic author from any of the urls
         for (@{$info->{source}}) {
-            if (isurl() && m%author.*/([A-Z]{3,})/%) {
-                $info->{author} = lc "$1\@cpan.org";
+            if (m{author.*/([A-Z])/(\1[A-Z])/(\2[A-Z]+)/}) {
+                $info->{author} = lc "$3\@cpan.org";
                 last;
                 }
             }
