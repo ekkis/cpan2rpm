@@ -154,7 +154,7 @@ sub init {
 
     my $cfg = "$ENV{HOME}/.$ME";
     if (-r $cfg) {
-        eval "use Getopt::ArgvFile qw/argvFile/";
+        eval { require Getopt::ArgvFile; };
         if ($@) {
             print "\n-- cpan2rpm - Ver: $VERSION --\n";
             my $msg = "A configuration file [$cfg] is present\n";
@@ -162,7 +162,7 @@ sub init {
             $msg .= "Either install the module or remove the config file.\n";
             die $msg;
             }
-        argvFile(home=> 1);
+        Getopt::ArgvFile::argvFile(home=> 1);
         }
 
     # get user options from command line
